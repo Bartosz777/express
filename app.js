@@ -38,5 +38,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+const isGood = true;
 
 module.exports = app;
