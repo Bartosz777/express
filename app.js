@@ -1,8 +1,11 @@
 var createError = require('http-errors');
+var cookieSession = require('cookie-session');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var config = require('./config');
+const mongoose = require('mongoose');
 
 var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
@@ -10,6 +13,21 @@ var newsRouter = require('./routes/news');
 var quizRouter = require('./routes/quiz');
 
 var app = express();
+
+// db connection
+mongoose.connect(config.db, 
+  {useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'connection error: '));
+db.once('open', function () {
+  console.log('Connected successfully');
+});
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,6 +38,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieSession({
+  name: 'session',
+  keys: config.keySession,
+
+  // Cookie Options
+  maxAge: config.maxAgeSession // 24h
+}))
+
 
 app.use(function(req, res, next) {
   res.locals.path = req.path;
